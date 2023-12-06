@@ -623,6 +623,143 @@ class suit_cw_id(suit_key):
     id = 7
     name = "CW ID"
 
+class cose_key_type(suit_key):
+    """Cose Key type metadata."""
+
+    id = 1
+    name = "key_type"
+
+class cose_key_id(suit_key):
+    """Cose Key ID metadata."""
+
+    id = 2
+    name = "key_id"
+
+class cose_alg_id(suit_key):
+    """Cose Key algorithm ID metadata."""
+
+    id = 3
+    name = "key_alg_id"
+
+class cose_key_ops(suit_key):
+    """Cose Key opartions metadata."""
+
+    id = 4
+    name = "key_ops"
+
+class cose_base_iv(suit_key):
+    """Cose Key base IV metadata."""
+
+    id = 5
+    name = "key_base_iv"
+
+class cose_key_type_okp(suit_key):
+    """Cose Octet Key Pair metadata."""
+
+    id = 1
+    name = "okp"
+
+class cose_key_type_ec2(suit_key):
+    """Cose Elliptic Curve Keys w/ x- and y-coordinate pair metadata."""
+
+    id = 2
+    name = "ec2"
+
+class cose_key_type_symmetric(suit_key):
+    """Cose Symmetric Keys metadata."""
+
+    id = 4
+    name = "symmetric"
+
+class cose_key_curve(suit_key):
+    """ Cose Elliptic Curve Key with Point compression curve name. """
+
+    id = -1
+    name = "curve"
+
+class cose_key_x(suit_key):
+    """ Cose Elliptic Curve Key with Point compression curve X coordinate. """
+
+    id = -2
+    name = "x"
+
+class cose_key_y(suit_key):
+    """ Cose Elliptic Curve Key with Point compression curve Y coordinate. """
+
+    id = -3
+    name = "y"
+
+class cose_key_d(suit_key):
+    """ Cose Elliptic Curve Key with Point compression private key. """
+
+    id = -4
+    name = "d"
+
+class cose_key_ec2_secp256r1(suit_key):
+    """ NIST P-256 also known as secp256r1 COSE key curve type value."""
+
+    id = 1
+    name = "secp256r1"
+
+class cose_key_ec2_secp384r1(suit_key):
+    """ NIST P-256 also known as secp384r1 COSE key curve type value."""
+
+    id = 2
+    name = "secp384r1"
+
+class cose_key_ec2_secp521r1(suit_key):
+    """ NIST P-256 also known as secp521r1 COSE key curve type value."""
+
+    id = 3
+    name = "secp521r1"
+
+class cose_key_okp_x25519(suit_key):
+    """ X25519 for use w/ ECDH only COSE key curve type value."""
+
+    id = 4
+    name = "x25519"
+
+class cose_key_okp_x448(suit_key):
+    """ X448 for use w/ ECDH only COSE key curve type value."""
+
+    id = 5
+    name = "x448"
+
+class cose_key_okp_ed25519(suit_key):
+    """ Ed25519 for use w/ EdDSA only COSE key curve type value."""
+
+    id = 6
+    name = "ed25519"
+
+class cose_key_okp_ed448(suit_key):
+    """ Ed448 for use w/ EdDSA only COSE key curve type value."""
+
+    id = 7
+    name = "ed448"
+
+class cwt_cose_key(suit_key):
+    """COSE Key metadata."""
+
+    id = 1
+    name = "key"
+
+class cwt_cose_encrypted_key(suit_key):
+    """COSE Encrypted Key metadata."""
+
+    id = 2
+    name = "encrypted_key"
+
+class cwt_cose_key_id(suit_key):
+    """COSE Key ID metadata."""
+
+    id = 3
+    name = "key_id"
+
+class suit_confirmation(suit_key):
+    """CWT Confirmation metadata."""
+
+    id = 8
+    name = "Confirmation"
 
 class cose_alg_sha_256(suit_key):
     """Cose algorithm metadata."""
@@ -673,7 +810,7 @@ class cose_alg_es_384(suit_key):
     name = "cose-alg-es-384"
 
 
-class cose_alg_es_521(suit_key):
+class cose_alg_es_512(suit_key):
     """Cose algorithm metadata."""
 
     id = -36
@@ -686,6 +823,23 @@ class cose_alg_eddsa(suit_key):
     id = -8
     name = "cose-alg-eddsa"
 
+class cose_alg_ps256(suit_key):
+    """Cose algorithm metadata."""
+
+    id = -37
+    name = "cose-alg-ps256"
+
+class cose_alg_ps384(suit_key):
+    """Cose algorithm metadata."""
+
+    id = -38
+    name = "cose-alg-ps384"
+
+class cose_alg_ps512(suit_key):
+    """Cose algorithm metadata."""
+
+    id = -39
+    name = "cose-alg-ps512"
 
 class suit_send_record_success(suit_key):
     """Reporting policy bit."""

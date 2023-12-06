@@ -24,9 +24,11 @@ from pathlib import Path
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
+from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from collections import defaultdict
 from enum import Enum, unique
 
@@ -46,6 +48,9 @@ class SuitAlgorithms(Enum):
     COSE_ALG_ES_384 = -35
     COSE_ALG_ES_521 = -36
     COSE_ALG_EdDSA = -8
+    COSE_ALG_PS256 = -37
+    COSE_ALG_PS384 = -38
+    COSE_ALG_PS512 = -39
 
 
 class SuitIds(Enum):
@@ -120,6 +125,8 @@ class Signer:
             return self._create_cose_es_signature
         elif isinstance(self._key, Ed25519PrivateKey):
             return self._create_cose_ed_signature
+        elif isinstance(self._key, RSAPrivateKey):
+            return self._create_cose_rsa_signature
         else:
             raise SignerError(f"Key {type(self._key)} not supported")
 
@@ -131,6 +138,12 @@ class Signer:
             return f"COSE_ALG_ES_{self._key.key_size}"
         elif isinstance(self._key, Ed25519PrivateKey):
             return "COSE_ALG_EdDSA"
+        elif isinstance(self._key, RSAPrivateKey) and hash_alg is SuitAlgorithms.COSE_ALG_SHA_256:
+            return f"COSE_ALG_PS256"
+        elif isinstance(self._key, RSAPrivateKey) and hash_alg is SuitAlgorithms.COSE_ALG_SHA_384:
+            return f"COSE_ALG_PS384"
+        elif isinstance(self._key, RSAPrivateKey) and hash_alg is SuitAlgorithms.COSE_ALG_SHA_512:
+            return f"COSE_ALG_PS512"
         else:
             raise SignerError(f"Key {type(self._key)} with {hash_alg} is not supported")
 
@@ -146,6 +159,26 @@ class Signer:
     def _create_cose_ed_signature(self, input_data: bytes) -> bytes:
         """Create ECDSA signature and return signature bytes."""
         return self._key.sign(input_data)
+
+    def _create_cose_rsa_signature(self, input_data: bytes) -> bytes:
+        """Create RSASSA-PSS signature and return signature bytes."""
+        if self._algorithm_name == "COSE_ALG_PS256":
+            hash = hashes.SHA256()
+        elif self._algorithm_name == "COSE_ALG_PS384":
+            hash = hashes.SHA384()
+        elif self._algorithm_name == "COSE_ALG_PS512":
+            hash = hashes.SHA512()
+        else:
+            raise SignError(f"RSA key with {self._algorithm_name} hash is not supported")
+
+        return self._key.sign(
+            input_data,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hash
+        )
 
     def _get_manifest_class_id(self):
         manifest = cbor2.loads(self.envelope.value[SuitIds.SUIT_MANIFEST.value])

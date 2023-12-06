@@ -36,6 +36,29 @@ from suit_generator.suit.types.keys import (
     suit_not_before,
     suit_issued_at,
     suit_cw_id,
+    cose_key_type,
+    cose_key_id,
+    cose_alg_id,
+    cose_key_ops,
+    cose_base_iv,
+    cose_key_type_okp,
+    cose_key_type_ec2,
+    cose_key_type_symmetric,
+    cose_key_curve,
+    cose_key_x,
+    cose_key_y,
+    cose_key_d,
+    cose_key_ec2_secp256r1,
+    cose_key_ec2_secp384r1,
+    cose_key_ec2_secp521r1,
+    cose_key_okp_x25519,
+    cose_key_okp_x448,
+    cose_key_okp_ed25519,
+    cose_key_okp_ed448,
+    cwt_cose_key,
+    cwt_cose_encrypted_key,
+    cwt_cose_key_id,
+    suit_confirmation,
     cose_alg_sha_256,
     cose_alg_shake128,
     cose_alg_sha_384,
@@ -43,8 +66,11 @@ from suit_generator.suit.types.keys import (
     cose_alg_shake256,
     cose_alg_es_256,
     cose_alg_es_384,
-    cose_alg_es_521,
+    cose_alg_es_512,
     cose_alg_eddsa,
+    cose_alg_ps256,
+    cose_alg_ps384,
+    cose_alg_ps512,
     suit_digest_algorithm_id,
     suit_digest_bytes,
 )
@@ -165,7 +191,7 @@ class SuitDigest(SuitUnion):
 class SuitcoseSignAlg(SuitEnum):
     """Representation of SUIT COSE sign algorithm."""
 
-    _metadata = Metadata(children=[cose_alg_es_256, cose_alg_es_384, cose_alg_es_521, cose_alg_eddsa])
+    _metadata = Metadata(children=[cose_alg_es_256, cose_alg_es_384, cose_alg_es_512, cose_alg_eddsa, cose_alg_ps256, cose_alg_ps384, cose_alg_ps512])
 
 
 class SuitHeaderMap(SuitKeyValue):
@@ -188,6 +214,121 @@ class SuitHeaderData(SuitUnion):
         ]
     )
 
+class CoseIdOrName(SuitUnion):
+    """Abstract element to define identifiers as text or integer values."""
+
+    _metadata = Metadata(
+        children=[
+            SuitInt,
+            SuitTstr,
+        ]
+    )
+
+class CoseIdsOrNames(SuitList):
+    """Abstract element to define list of identifiers as text or integers."""
+
+    _metadata = Metadata(children=[CoseIdOrName])
+
+class CoseKeyType(SuitEnum):
+    """List of recognized COSE key types."""
+
+    _metadata = Metadata(
+        children=[
+            cose_key_type_okp,
+            cose_key_type_ec2,
+            cose_key_type_symmetric,
+        ]
+    )
+
+class CoseKeyGeneric(SuitKeyValue):
+    """Representation of COSE Key."""
+
+    _metadata = Metadata(
+        map={
+            cose_key_type: CoseKeyType,
+            cose_key_id: cbstr(SuitInt),
+            cose_alg_id: CoseIdOrName,
+            cose_key_ops: CoseIdsOrNames,
+            cose_base_iv: SuitBstr,
+        }
+    )
+
+class CoseKeyEc2CurveType(SuitEnum):
+    """List of recognized Elliptic Curve keys with point compression."""
+
+    _metadata = Metadata(
+        children=[
+            cose_key_ec2_secp256r1,
+            cose_key_ec2_secp384r1,
+            cose_key_ec2_secp521r1,
+        ]
+    )
+
+class CoseKeyEllipticCurveEc2(CoseKeyGeneric):
+    """Representation of COSE Elliptic Curve Key with point compression."""
+
+    _metadata = Metadata(
+        map={
+            cose_key_type: CoseKeyType,
+            cose_key_id: cbstr(SuitInt),
+            cose_alg_id: CoseIdOrName,
+            cose_key_ops: CoseIdsOrNames,
+            cose_base_iv: SuitBstr,
+            cose_key_curve: CoseKeyEc2CurveType,
+            cose_key_x: SuitBstr,
+            cose_key_y: SuitBstr,
+            cose_key_d: SuitBstr,
+        }
+    )
+
+class CoseKeyOkpCurveType(SuitEnum):
+    """List of recognized Elliptic Curve keys with Octet Key Pairs."""
+
+    _metadata = Metadata(
+        children=[
+            cose_key_okp_x25519,
+            cose_key_okp_x448,
+            cose_key_okp_ed25519,
+            cose_key_okp_ed448,
+        ]
+    )
+
+class CoseKeyEllipticCurveOkp(CoseKeyGeneric):
+    """Representation of COSE Elliptic Curve Key with Octet Key Pairs."""
+
+    _metadata = Metadata(
+        map={
+            cose_key_type: CoseKeyType,
+            cose_key_id: cbstr(SuitInt),
+            cose_alg_id: CoseIdOrName,
+            cose_key_ops: CoseIdsOrNames,
+            cose_base_iv: SuitBstr,
+            cose_key_curve: CoseKeyOkpCurveType,
+            cose_key_x: SuitBstr,
+            cose_key_d: SuitBstr,
+        }
+    )
+
+class CoseKey(SuitUnion):
+    """Representation of COSE Key structure."""
+    _metadata = Metadata(
+        children=[
+            CoseKeyEllipticCurveOkp,
+            CoseKeyEllipticCurveEc2,
+            CoseKeyGeneric,
+        ]
+    )
+
+class SuitConfirmation(SuitKeyValue):
+    """Representation of CBOR Web Token Confirmation claim."""
+
+    _metadata = Metadata(
+        map={
+            cwt_cose_key: CoseKey,
+            #cwt_cose_encrypted_key: COSE_Encrypt or COSE_Encrypt0,
+            cwt_cose_key_id: cbstr(SuitInt),
+        }
+    )
 
 class SuitCwtPayload(SuitKeyValue):
     """Representation of CBOR Web Token."""
@@ -202,6 +343,8 @@ class SuitCwtPayload(SuitKeyValue):
             suit_not_before: SuitInt,
             suit_issued_at: SuitInt,
             suit_cw_id: SuitBstr,
+            # Additional fields defined in RFC 8747
+            suit_confirmation: SuitConfirmation
         }
     )
 

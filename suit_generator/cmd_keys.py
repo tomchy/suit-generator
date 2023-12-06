@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.asymmetric.ed448 import Ed448PrivateKey
@@ -70,6 +72,8 @@ class KeyGenerator:
         "secp521r1": ec.SECP521R1,
         "ed25519": None,
         "ed448": None,
+        "rsa2048": None,
+        "rsa4096": None,
     }
     default_key_type = "secp256r1"
 
@@ -112,7 +116,7 @@ class KeyGenerator:
         self._write(private, f"{file_name_prefix}_priv.{encoding}")
         self._write(public, f"{file_name_prefix}_pub.{encoding}")
 
-    def generate_private_key(self, type: str) -> EllipticCurvePrivateKey | Ed25519PrivateKey | Ed448PrivateKey:
+    def generate_private_key(self, type: str) -> EllipticCurvePrivateKey | Ed25519PrivateKey | Ed448PrivateKey | RSAPrivateKey:
         """Generate and returns private key object."""
         if type in ("secp256r1", "secp384r1", "secp521r1"):
             return ec.generate_private_key(KeyGenerator.supported_key_types[type])
@@ -120,6 +124,16 @@ class KeyGenerator:
             return Ed25519PrivateKey.generate()
         elif type == "ed448":
             return Ed448PrivateKey.generate()
+        elif type == "rsa2048":
+            return rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+            )
+        elif type == "rsa4096":
+            return rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=4096,
+            )
         else:
             raise TypeError(f"{type} not supported")
 
